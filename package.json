@@ -1,0 +1,48 @@
+{
+  "name": "coki-ries",
+  "version": "1.0.0",
+  "description": "Generates data tables and plots for publication analysis that's based on field of research (FoR).",
+  "type": "commonjs",
+  "main": "code/app.js",
+  "scripts": {
+    "build": "node code/utilities/compile_all",
+    "cli": "node code/app.js",
+    "ping": "node code/utilities/config_test",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "Julian Tonti-Filippini",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@fast-csv/parse": "^4.3.6",
+    "@google-cloud/bigquery": "^6.2.0",
+    "app": "link:code",
+    "cheerio": "1.0.0-rc.12",
+    "docopt": "^0.6.2",
+    "exceljs": "^4.3.0",
+    "fast-xml-parser": "^4.2.2",
+    "gunzip-maybe": "^1.4.2",
+    "human-format": "^1.2.0",
+    "node-fetch": "2",
+    "papaparse": "^5.4.1",
+    "shelljs": "^0.8.5",
+    "tar": "^6.1.15",
+    "tar-stream": "^3.0.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.0.2",
+    "jest": "^29.5.0"
+  },
+  "directories": {
+    "doc": "docs",
+    "lib": "code"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Curtin-Open-Knowledge-Initiative/for_benchmark_predictions.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Curtin-Open-Knowledge-Initiative/for_benchmark_predictions/issues"
+  },
+  "homepage": "https://github.com/Curtin-Open-Knowledge-Initiative/for_benchmark_predictions#readme"
+}

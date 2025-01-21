@@ -1,0 +1,18 @@
+{
+  "project": "my-project",
+  "version": "",
+  "replace": false,
+  "inst_project_override": "",
+  "start": 2011,
+  "finish": 2022,
+  "institutional_hep_codes": ["HEP1", "HEP2"],
+  "coki_project": "coki-project-name",
+  "coki_dataset": "coki-dataset-name",
+  "doi_table_version": "20200101",
+  "keyfile": ".keyfile.json",
+  "compile_ries_queries": true,
+  "run_ries_queries": false,
+  "export_ries_tables": true,
+  "run_output_queries": true,
+  "export_hep_outputs": true
+}

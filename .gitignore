@@ -1,0 +1,20 @@
+# Default ignored files
+.*
+!.gitignore
+!.gitattributes
+#!.zenodo.json
+node_modules
+out
+temp
+archive.zip
+credentials.*
+keyfile.*
+access.*
+config.*
+
+
+/data/*
+!/data/README.md
+
+/docs/*.pdf
+/docs/*.jsonlr
