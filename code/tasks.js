@@ -134,7 +134,7 @@ function run_output_queries(config) {
     console.log(
       `Creating 'output' tables for hep (institutional): ${hep_code}`,
     );
-    let output_project = `ries-${hep_code.toLowerCase}`;
+    let output_project = `ries-${hep_code.toLowerCase()}`;
     if (config.inst_project_override) {
       output_project = config.inst_project_override;
       console.log(
