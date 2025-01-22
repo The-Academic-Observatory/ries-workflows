@@ -32,14 +32,14 @@ const compile_all = (
     replace: true,
     start: 2011,
     finish: 2022,
-    hep_code: null,
+    hep_code: "", // Optional
     assignment: "",
     field: "",
     doi_table: "",
   },
 ) => {
   // Some basic checks for valid input
-  if (conf.hep_code) {
+  if (conf.hep_code && conf.hep_code !== "") {
     check_hep_code(conf.hep_code);
     console.log(`Compiling for institutional HEP: ${conf.hep_code}`);
   }
