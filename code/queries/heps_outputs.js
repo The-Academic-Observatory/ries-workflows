@@ -39,7 +39,7 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
       ARRAY_AGG(STRUCT(
         authorship.author.display_name AS name,
         authorship.author.orcid AS orcid,
-        authorship.raw_affiliation_string AS raw_affiliation
+        authorship.raw_affiliation_strings AS raw_affiliation
       )) AS hep_authors
     FROM ${doi_table}, UNNEST(openalex.authorships) AS authorship, UNNEST(institutions)
     WHERE EXISTS(SELECT 1 from UNNEST(authorship.institutions))
@@ -55,7 +55,7 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
       ARRAY_AGG(STRUCT(
         authorship.author.display_name AS name,
         authorship.author.orcid AS orcid,
-        authorship.raw_affiliation_string AS raw_affiliation
+        authorship.raw_affiliation_strings AS raw_affiliation
       )) AS authors
   FROM ${doi_table}
   LEFT JOIN UNNEST(openalex.authorships) AS authorship
@@ -148,7 +148,7 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
       ARRAY_AGG(STRUCT(
         authorship.author.display_name AS name,
         authorship.author.orcid AS orcid,
-        authorship.raw_affiliation_string AS raw_affiliation
+        authorship.raw_affiliation_strings AS raw_affiliation
       )) AS hep_authors
     FROM  ${doi_table}, 
     UNNEST(openalex.authorships) AS authorship 
@@ -165,7 +165,7 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
       ARRAY_AGG(STRUCT(
         authorship.author.display_name AS name,
         authorship.author.orcid AS orcid,
-        authorship.raw_affiliation_string AS raw_affiliation
+        authorship.raw_affiliation_strings AS raw_affiliation
       )) AS authors
   FROM ${doi_table}
   LEFT JOIN UNNEST(openalex.authorships) AS authorship
