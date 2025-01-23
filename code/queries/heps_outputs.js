@@ -200,15 +200,15 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
   alex_hep AS (
     SELECT 
       doi,
+      ror,
       ARRAY_AGG(STRUCT(
         authorship.author.display_name AS name,
         authorship.author.orcid AS orcid,
         authorship.raw_affiliation_strings AS raw_affiliation
       )) AS hep_authors
-    FROM  ${doi_table}, 
-    UNNEST(openalex.authorships) AS authorship 
+    FROM ${doi_table}, UNNEST(openalex.authorships) AS authorship, UNNEST(institutions)
     WHERE EXISTS(SELECT 1 from UNNEST(authorship.institutions) WHERE ror = '${hep_ror}')
-    GROUP BY doi
+    GROUP BY doi, ror
   ),
 
   alex_all AS (
@@ -231,6 +231,7 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
     SELECT 
       alex_all.*,
       hep.hep_authors AS hep_authors,
+      hep.ror AS hep_ror
       FROM alex_all AS alex_all
       LEFT JOIN alex_hep AS hep ON alex_all.doi = hep.doi
   ),
@@ -261,8 +262,8 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
         assig.frac                 AS weight,
         ROUND(rci.rci_world, 3)    AS rci_global
       )) AS apportionment
-    FROM \`${project}.${dataset}.core_assignments${version}\` WHERE inst = '${hep_ror}' AS assig
-    LEFT KOIN \`${project}.${dataset}.rci_papers${version}\` AS rci ON assig.paper = rci.doi and assig.field = rci.field
+    FROM \`${project}.${dataset}.core_assignments${version}\` AS assig
+    LEFT JOIN \`${project}.${dataset}.rci_papers${version}\` AS rci ON assig.paper = rci.doi and assig.field = rci.field
     GROUP BY doi, ror
   ),
 
@@ -310,7 +311,7 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
     int_collab.int_collab
   FROM outputs 
   LEFT JOIN int_collab ON outputs.doi = int_collab.doi 
-  WHERE ries.institution = '${hep_ror}'
+  WHERE hep_ror = '${hep_ror}'
 );
 
   ALTER TABLE \`${project}.${dataset}.heps_outputs${version}\` SET OPTIONS(description='HEP outputs for fields of education identified by the RIES by-line approach.');

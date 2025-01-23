@@ -91,8 +91,9 @@ class SQLBatchWriter {
       return;
     }
     const insert_into =
-      `INSERT INTO outputs (inst, classification, assignment, doi, openalex_id, journal_era_id, journal_title, ` +
-      `paper_title, inst_authors, authors, year, citations, apportionment) VALUES\n`;
+      `INSERT INTO outputs (doi, inst, assignment, classification, openalex_id, journal_era_id, journal_title, ` +
+      `paper_title, oa, institutions, authors, inst_authors, year, citations, citations, apportionment,` +
+      `hep_ror, int_collab) VALUES \n`;
     await this.write_to_stream(insert_into);
     await this.check_buffer();
 
@@ -127,23 +128,28 @@ class SQLBatchWriter {
     // Function to process each JSON row and convert to SQL INSERT statement
     const formatValue = (value) => {
       if (value === null || value === "null") return "null";
-      return `"${value.toString().replace(/"/g, '""')}"`;
+      value = value.toString().replace(/"/g, '""');
+      return `"${value.toString().replace(/'/g, "''")}"`;
     };
 
     let {
-      hep_code = null,
-      classification = null,
-      assignment = null,
       doi = null,
+      inst = null,
+      assignment = null,
+      classification = null,
       openalex_id = null,
       journal_era_id = null,
       journal_title = null,
       paper_title = null,
+      oa = null,
+      institutions = [],
       authors = [],
       inst_authors = [],
       year = null,
       citations = null,
       apportionment = [],
+      hep_ror = null,
+      int_collab = null,
     } = JSON.parse(JSON.stringify(row));
     // Process authors
     authors = authors.map((author) => {
@@ -168,19 +174,23 @@ class SQLBatchWriter {
 
     // Format values for SQL
     const values = [
-      formatValue(hep_code),
-      formatValue(classification),
-      formatValue(assignment),
       formatValue(doi),
+      formatValue(inst),
+      formatValue(assignment),
+      formatValue(classification),
       formatValue(openalex_id),
       formatValue(journal_era_id),
       formatValue(journal_title),
       formatValue(paper_title),
-      `json('${JSON.stringify(inst_authors)}')`,
-      `json('${JSON.stringify(authors)}')`,
+      oa,
+      `json('${JSON.stringify(institutions).replace(/'/g, "''")}')`,
+      `json('${JSON.stringify(authors).replace(/'/g, "''")}')`,
+      `json('${JSON.stringify(inst_authors).replace(/'/g, "''")}')`,
       year === null ? "null" : year,
       citations === null ? "null" : citations,
-      `json('${JSON.stringify(apportionment)}')`,
+      `json('${JSON.stringify(apportionment).replace(/'/g, "''")}')`,
+      formatValue(hep_ror),
+      int_collab,
     ];
 
     return `(${values.join(", ")})`;
