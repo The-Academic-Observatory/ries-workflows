@@ -39,9 +39,14 @@ Example of what a service accouint key looks like:
 ```bash
 # Set up various GCP resources and permissions
 bash gcp_setup.sh my_project coki_project service_account_principal
+
+# Set up any institutional projects
+bash inst_gcp_setup.sh inst_project service_account_principal
 ```
 
 In order for your service account to interact with your project's various resources, it requires specific permissions on GCP. The RIES workflow also makes use of COKI resources, which are a part of the COKI GCP project. The final argument is the service account principal. This is the email address identifier that your service account uses. This can be found on GCP or in your linked keyfile under *client_email*.
+
+In a production setting, the workflow will also attempt to write institutional datasets to their respective Bigquery projects. For this reason, we need to also provide permissions for access to these projects with the `inst_gcp_setup.sh` script.
 
 At this point, you should have a generic config file at .config.json. A properly conctructed config file is essential to running the RIES workflow. For further information on the file's contents, see [configuration]. Make sure your config file is set up before proceeding.
 

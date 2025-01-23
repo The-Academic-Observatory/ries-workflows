@@ -21,6 +21,9 @@ ln -s /path/to/your/keyfile.json .keyfile.json
 
 # Set up various GCP permissions and resources
 bash gcp_setup.sh my_project coki_project service_account_principal
+
+# Set up any institutional projects
+bash inst_gcp_setup.sh inst_project service_account_principal
 ```
 
 See [configure] for more information on the config file contents

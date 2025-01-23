@@ -3,35 +3,9 @@
 Given a generated SQL file, break it up into chunks and exec all the queries via the CLI.
 
 */
-const { readFileSync, createWriteStream, writeFileSync } = require("fs");
+const { readFileSync, writeFileSync } = require("fs");
 const { prepend } = require("./path_manager");
-const { exec, execSync } = require("node:child_process");
-
-// async function run_query_stream_json(
-//   project = "",
-//   query = "",
-//   qfile = null,
-//     outfile = ""
-// ) {
-//
-//   if (!qfile) {
-//     qfile = prepend(`.query_${Date.now()}.sql`);
-//   }
-//     let current_write_stream = null
-//     const createNewWriteStream = (basePath) => {
-//         const parts = basePath.split('.');
-//         const newPath = currentFileIndex === 1
-//             ? basePath
-//             : `${parts[0]}_${currentFileIndex}.${parts[1]}`;
-//
-//         current_write_stream = createWriteStream(newPath);
-//         currentFileSize = 0;
-//         return current_write_stream;
-//     };
-//   try {
-//   }
-//
-// }
+const { execSync } = require("node:child_process");
 
 function run_query(project = "", query = "", qfile = null, format = "none") {
   if (!qfile) {
