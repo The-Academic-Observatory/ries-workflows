@@ -91,9 +91,8 @@ class SQLBatchWriter {
       return;
     }
     const insert_into =
-      `INSERT INTO outputs (doi, inst, assignment, classification, openalex_id, journal_era_id, journal_title, ` +
-      `paper_title, oa, institutions, authors, inst_authors, year, citations, citations, apportionment,` +
-      `hep_ror, int_collab) VALUES \n`;
+      `INSERT INTO outputs (inst, classification,assignment, doi, openalex_id, journal_era_id, journal_title, ` +
+      `paper_title, oa, institutions, authors, inst_authors, year, citations, apportionment, int_collab) VALUES \n`;
     await this.write_to_stream(insert_into);
     await this.check_buffer();
 
@@ -128,8 +127,31 @@ class SQLBatchWriter {
     // Function to process each JSON row and convert to SQL INSERT statement
     const formatValue = (value) => {
       if (value === null || value === "null") return "null";
-      value = value.toString().replace(/"/g, '""');
-      return `"${value.toString().replace(/'/g, "''")}"`;
+      value = value.toString().replaceAll('"', '""');
+      return `"${value.toString().replaceAll("'", "''")}"`;
+    };
+    const transformList = (
+      items,
+      replaceQuotesFields = [],
+      fieldsToDrop = null,
+    ) => {
+      for (const item of items) {
+        // Replace single quotes in specified fields
+        for (const field of replaceQuotesFields) {
+          if (item[field]) {
+            item[field] = item[field].replaceAll("'", "''");
+          }
+        }
+
+        // Remove specified fields if fieldsToDrop is not null
+        if (fieldsToDrop) {
+          for (const field of fieldsToDrop) {
+            delete item[field];
+          }
+        }
+      }
+
+      return items;
     };
 
     let {
@@ -148,48 +170,34 @@ class SQLBatchWriter {
       year = null,
       citations = null,
       apportionment = [],
-      hep_ror = null,
       int_collab = null,
-    } = JSON.parse(JSON.stringify(row));
-    // Process authors
-    authors = authors.map((author) => {
-      if (author.name) {
-        author.name = author.name.replace(/'/g, "''");
-      }
-      const { raw_affiliation, ...authorWithoutRaw } = author;
-      return authorWithoutRaw;
-    });
+    } = row;
 
-    // Process institutional authors
-    inst_authors = inst_authors.map((author) => {
-      if (author.name) {
-        author.name = author.name.replace(/'/g, "''");
-      }
-      const { raw_affiliation, ...authorWithoutRaw } = author;
-      return authorWithoutRaw;
-    });
+    // Filter some nested fields
+    transformList(inst_authors, ["name"], ["raw_affiliation"]);
+    transformList(authors, ["name"], ["raw_affiliation"]);
+    transformList(institutions, ["name"]);
 
     // Filter empty apportionment objects
     apportionment = apportionment.filter((app) => Object.keys(app).length > 0);
 
     // Format values for SQL
     const values = [
-      formatValue(doi),
       formatValue(inst),
-      formatValue(assignment),
       formatValue(classification),
+      formatValue(assignment),
+      formatValue(doi),
       formatValue(openalex_id),
       formatValue(journal_era_id),
       formatValue(journal_title),
       formatValue(paper_title),
       oa,
-      `json('${JSON.stringify(institutions).replace(/'/g, "''")}')`,
-      `json('${JSON.stringify(authors).replace(/'/g, "''")}')`,
-      `json('${JSON.stringify(inst_authors).replace(/'/g, "''")}')`,
+      `json('${JSON.stringify(institutions)}')`,
+      `json('${JSON.stringify(authors)}')`,
+      `json('${JSON.stringify(inst_authors)}')`,
       year === null ? "null" : year,
       citations === null ? "null" : citations,
-      `json('${JSON.stringify(apportionment).replace(/'/g, "''")}')`,
-      formatValue(hep_ror),
+      `json('${JSON.stringify(apportionment)}')`,
       int_collab,
     ];
 
