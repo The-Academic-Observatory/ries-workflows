@@ -145,11 +145,11 @@ function run_output_queries(config) {
       console.log(`Writing output to project: ${output_project}`);
     }
 
-    let output_projects = [output_project, config.project]
-      if output_project === config.project{
-          // Don't double write the table
-          output_projects = output_projects[0]
-      }
+    let output_projects = [output_project, config.project];
+    if (output_project === config.project) {
+      // Don't double write the table
+      output_projects = output_projects[0];
+    }
 
     for (out of output_project) {
       let result = run_query(
