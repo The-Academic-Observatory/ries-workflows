@@ -464,6 +464,13 @@ const conf = new (function () {
   }
 
   const args_base = get_args();
+  // If version is missing, use the doi version
+  if (!args_base.version) {
+    console.log(
+      `Version string empty, will use DOI table version: ${args_base.doi_table_version}`,
+    );
+    args_base.version = args_base.doi_table_version;
+  }
 
   function update(updates = {}) {
     const args = Object.assign({}, args_base, updates);
