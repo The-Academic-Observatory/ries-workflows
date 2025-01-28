@@ -60,7 +60,7 @@ CREATE OR REPLACE TABLE \`${odataset}.heps_papers${version}\`                   
 CREATE OR REPLACE TABLE \`${odataset}.heps_assignments${version}\`                    AS (SELECT * FROM \`${idataset}.core_assignments${version}\`                    WHERE inst        = '${hep_ror}');
 CREATE OR REPLACE TABLE \`${odataset}.heps_summary_by_field_year_2_${version}\`       AS (SELECT * FROM \`${idataset}.heps_summary_by_field_year_2_${version}\`       WHERE institution = '${hep_ror}');
 CREATE OR REPLACE TABLE \`${odataset}.heps_summary_by_field_year_4_${version}\`       AS (SELECT * FROM \`${idataset}.heps_summary_by_field_year_4_${version}\`       WHERE institution = '${hep_ror}');
-CREATE OR REPLACE TABLE \`${odataset}.heps_outputs${version}\`                        AS (SELECT *, '${hep_code}' AS inst FROM \`${idataset}.heps_outputs${version}\` WHERE hep_ror = '${hep_ror}');
+CREATE OR REPLACE TABLE \`${odataset}.heps_outputs${version}\`                        AS (SELECT * FROM \`${idataset}.heps_outputs${version}\` WHERE hep_ror = '${hep_ror}');
 `;
 };
 
