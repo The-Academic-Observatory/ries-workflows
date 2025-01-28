@@ -129,7 +129,7 @@ function export_ries_tables(config) {
 
 function run_output_queries(config) {
   // Creates the tables for a HEP in BQ using institutional assignment
-  // Tables are stored in their institution's project: ries-{HEP}
+  // Tables are stored in their institution's project: ries-{HEP} and the config.project
   for (const hep_code of config.institutional_hep_codes) {
     console.log(
       `Creating 'output' tables for hep (institutional): ${hep_code}`,
@@ -145,22 +145,29 @@ function run_output_queries(config) {
       console.log(`Writing output to project: ${output_project}`);
     }
 
-    let result = run_query(
-      config.project,
-      compile_hep_institutional({
-        project: config.project,
-        output_project: output_project,
-        version: config.version,
-        doi_table: path_config.doi_table,
-        hep_code: hep_code,
-      }),
-      path_config.create_output[hep_code],
-    );
+    let output_projects = [output_project, config.project]
+      if output_project === config.project{
+          // Don't double write the table
+          output_projects = output_projects[0]
+      }
 
-    check_result(result);
-    console.log(
-      `Output institutional/automatic datasets written to: ${output_project}`,
-    );
+    for (out of output_project) {
+      let result = run_query(
+        config.project,
+        compile_hep_institutional({
+          project: config.project,
+          output_project: out,
+          version: config.version,
+          doi_table: path_config.doi_table,
+          hep_code: hep_code,
+        }),
+        path_config.create_output[hep_code],
+      );
+      check_result(result);
+      console.log(
+        `Output institutional/automatic datasets written to: ${output_project}`,
+      );
+    }
   }
   return { success: true };
 }
