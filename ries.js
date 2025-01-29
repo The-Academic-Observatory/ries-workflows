@@ -13,12 +13,7 @@ const { path_config } = require("./code/utilities/path_manager.js");
 async function run(run_config) {
   // Runs the RIES workflow.
   // Will check the config for each 'task'. If the task is enabled, it will be run with the supplied config.
-  if (!run_config.version) {
-    console.log(
-      `Version string empty, will use DOI table version: ${run_config.doi_table_version}`,
-    );
-    run_config.version = run_config.doi_table_version;
-  }
+
   // Output the path config to a file for debuging purposes
   fs.writeFileSync(".path_config", JSON.stringify(path_config, null, 2));
   console.log(`Path config written to '.path_config' for debugging`);
