@@ -141,17 +141,16 @@ function run_output_queries(config) {
         `Overwriting institutional output project: ${output_project}`,
       );
       check_string(output_project);
-    } else {
-      console.log(`Writing output to project: ${output_project}`);
     }
 
     let output_projects = [output_project, config.project];
     if (output_project === config.project) {
       // Don't double write the table
-      output_projects = output_projects[0];
+      output_projects = [output_projects[0]];
     }
 
-    for (out of output_project) {
+    for (out of output_projects) {
+      console.log(`Writing output to project: ${out}`);
       let result = run_query(
         config.project,
         compile_hep_institutional({
