@@ -258,11 +258,11 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
     doi_all.oa                           AS oa,
     doi_all.institutions                 AS institutions,
     alex.authors                         AS authors,
-    STRUCT(
+    ARRAY[STRUCT(
         NULL AS name,
         NULL AS orcid, 
         NULL AS raw_affiliation
-    ) AS inst_authors,
+    )] AS inst_authors,
     ries.year                            AS year,
     ries.citations                       AS citations,
     assignments.apportionment            AS apportionment,
