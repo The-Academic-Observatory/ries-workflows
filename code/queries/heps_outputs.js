@@ -196,22 +196,8 @@ function compile_institutional({
     BEGIN
 CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
   WITH 
-  -- extract HEP authors from Open Alex data
-  alex_hep AS (
-    SELECT 
-      doi,
-      ror,
-      ARRAY_AGG(STRUCT(
-        authorship.author.display_name AS name,
-        authorship.author.orcid AS orcid,
-        authorship.raw_affiliation_strings AS raw_affiliation
-      )) AS hep_authors
-    FROM ${doi_table}, UNNEST(openalex.authorships) AS authorship, UNNEST(institutions)
-    WHERE EXISTS(SELECT 1 from UNNEST(authorship.institutions) WHERE ror = '${hep_ror}')
-    GROUP BY doi, ror
-  ),
 
-  alex_all AS (
+  alex AS (
     SELECT 
       doi            AS doi,
       openalex.id    AS id,
@@ -225,15 +211,6 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
   FROM ${doi_table}
   LEFT JOIN UNNEST(openalex.authorships) AS authorship
   GROUP BY doi, id, paper_title, journal_title
-  ),
-
-  alex AS (
-    SELECT 
-      alex_all.*,
-      hep.hep_authors AS hep_authors,
-      hep.ror AS hep_ror
-      FROM alex_all AS alex_all
-      LEFT JOIN alex_hep AS hep ON alex_all.doi = hep.doi
   ),
 
   -- extract oa status, institution and country details
@@ -281,13 +258,17 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
     doi_all.oa                           AS oa,
     doi_all.institutions                 AS institutions,
     alex.authors                         AS authors,
-    alex.hep_authors                     AS inst_authors, #hep_authors,
+    ARRAY[STRUCT(
+        NULL AS name,
+        NULL AS orcid, 
+        NULL AS raw_affiliation
+    )] AS inst_authors,
     ries.year                            AS year,
     ries.citations                       AS citations,
     assignments.apportionment            AS apportionment,
     ries.institution                     AS hep_ror
   FROM \`${project}.${dataset}.heps_papers${version}\` AS ries
-  LEFT JOIN alex ON ries.doi = alex.doi AND alex.hep_ror = ries.institution
+  LEFT JOIN alex ON ries.doi = alex.doi 
   LEFT JOIN assignments ON ries.doi = assignments.doi AND ries.institution = assignments.ror
   LEFT JOIN \`${project}.${dataset}.heps${version}\` AS all_heps ON all_heps.ror = ries.institution
   LEFT JOIN doi_all ON ries.doi = doi_all.doi

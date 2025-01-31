@@ -206,8 +206,8 @@ async function export_hep_outputs(config) {
   for (hep of config.institutional_hep_codes) {
     console.log(`Exporting institutional HEP outputs: ${hep}`);
     sql = output_hep_data.compile({
-      for_table: `${config.project}.ries_fors_${hep}_institutional_outputs.heps_outputs${config.version}`,
-      foe_table: `${config.project}.ries_foes_${hep}_institutional_outputs.heps_outputs${config.version}`,
+      for_table: `${config.project}.ries_fors_${hep}.heps_outputs${config.version}`,
+      foe_table: `${config.project}.ries_foes_${hep}.heps_outputs${config.version}`,
     });
     await process_query_stream(bq_link.bq.createQueryStream(sql), query_writer);
     fs.writeFileSync(path_config.export_output.inst_queries[hep], sql);
