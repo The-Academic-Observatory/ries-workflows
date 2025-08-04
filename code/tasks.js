@@ -199,6 +199,7 @@ async function export_hep_outputs(config) {
   let sql = output_hep_data.compile({
     for_table: `${config.project}.ries_fors.heps_outputs${config.version}`,
     foe_table: `${config.project}.ries_foes.heps_outputs${config.version}`,
+    heps: config.output_heps_filter,
   });
   fs.writeFileSync(path_config.export_output.auto_query, sql);
   await process_query_stream(bq_link.bq.createQueryStream(sql), query_writer);

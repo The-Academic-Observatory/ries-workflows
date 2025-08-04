@@ -380,6 +380,11 @@ const conf = new (function () {
       type: "array",
       info: "the institutional hep codes to run the workflow with",
     },
+    output_heps_filter: {
+      default: [],
+      type: "array",
+      info: "the hep codes to filter by for the outputs. If empty, will not filter",
+    },
     compile_ries_queries: {
       default: false,
       type: "bool",

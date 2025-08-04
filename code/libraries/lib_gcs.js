@@ -19,6 +19,7 @@ function copy(src, dest, project) {
 }
 
 function push(local, remote) {
+  console.log(`gcloud storage cp ${resolve(local)} gs://${remote}`);
   return sh.exec(`gcloud storage cp ${resolve(local)} gs://${remote}`);
 }
 
