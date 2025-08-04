@@ -190,8 +190,8 @@ async function export_hep_outputs(config) {
   const query_writer = new SQLBatchWriter({
     dir: "data",
     file_pre: path_config.export_output.sql_file,
-    max_rows_per_insert: 10,
-    max_inserts_per_file: 5000,
+    max_rows_per_insert: 5,
+    max_inserts_per_file: 10000,
   });
 
   console.log("Exporting automatic HEP outputs");
