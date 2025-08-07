@@ -53,11 +53,12 @@ function compile_automatic({
 BEGIN
 CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
   WITH 
-  -- extract HEP authors from Open Alex data
-  alex_hep AS (
+  -- extract HEP authors from Open Alex data, linked with the work (doi)
+  alex AS (
     SELECT 
       doi,
-      ror,
+      ror as hep_ror,
+      openalex.id as id,
       ARRAY_AGG(STRUCT(
         authorship.author.display_name AS name,
         authorship.author.orcid AS orcid,
@@ -65,32 +66,23 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
       )) AS hep_authors
     FROM ${doi_table}, UNNEST(openalex.authorships) AS authorship, UNNEST(institutions)
     WHERE EXISTS(SELECT 1 from UNNEST(authorship.institutions))
-    GROUP BY doi, ror
+    GROUP BY doi, hep_ror, id
   ),
 
-  alex_all AS (
-    SELECT 
-      doi            AS doi,
-      openalex.id    AS id,
+  -- get all authors for a doi
+  authors_all AS (
+      SELECT 
+      doi,
       ARRAY_AGG(STRUCT(
-        authorship.author.display_name AS name,
-        authorship.author.orcid AS orcid,
-        authorship.raw_affiliation_strings AS raw_affiliation
+        authors.name AS name,
+        authors.identifier AS orcid
       )) AS authors
-  FROM ${doi_table}
-  LEFT JOIN UNNEST(openalex.authorships) AS authorship
-  GROUP BY doi, id
+      FROM ${doi_table}
+      LEFT JOIN UNNEST(affiliations.authors) as authors
+      GROUP BY doi
   ),
 
-  alex AS (
-    SELECT 
-      alex_all.*,
-      hep.hep_authors AS hep_authors,
-      hep.ror AS hep_ror
-      FROM alex_all AS alex_all
-      LEFT JOIN alex_hep AS hep ON alex_all.doi = hep.doi
-  ),
-  -- extract oa status, institution and country details
+  -- extract oa status, institution and country details, title and journal names 
   doi_all AS (
     SELECT
      doi            AS doi,
@@ -136,17 +128,18 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
     doi_all.paper_title                  AS paper_title,
     doi_all.oa                           AS oa,
     doi_all.institutions                 AS institutions,
-    alex.authors                         AS authors,
+    authors_all.authors                  AS authors,
     alex.hep_authors                     AS inst_authors, #hep_authors,
     ries.year                            AS year,
     ries.citations                       AS citations,
     assignments.apportionment            AS apportionment,
     ries.institution                     AS hep_ror
   FROM \`${project}.${dataset}.heps_papers${version}\` AS ries
-  LEFT JOIN alex ON ries.doi = alex.doi AND alex.ror = ries.institution
+  LEFT JOIN alex ON ries.doi = alex.doi AND alex.hep_ror = ries.institution
   LEFT JOIN assignments ON ries.doi = assignments.doi AND ries.institution = assignments.ror
   LEFT JOIN \`${project}.${dataset}.heps${version}\` AS all_heps ON all_heps.ror = ries.institution
   LEFT JOIN doi_all ON ries.doi = doi_all.doi
+  LEFT JOIN authors_all on authors_all.doi = doi_all.doi
   WHERE year >= ${start} AND year <= ${finish} 
   ORDER BY year, doi
 ),
@@ -200,8 +193,6 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
     SELECT 
       doi            AS doi,
       openalex.id    AS id,
-      openalex.title AS paper_title,
-      openalex.primary_location.source.display_name AS journal_title,
       ARRAY_AGG(STRUCT(
         authorship.author.display_name AS name,
         authorship.author.orcid AS orcid,
@@ -209,7 +200,7 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
       )) AS authors
   FROM ${doi_table}
   LEFT JOIN UNNEST(openalex.authorships) AS authorship
-  GROUP BY doi, id, paper_title, journal_title
+  GROUP BY doi, id
   ),
 
   -- extract oa status, institution and country details
@@ -217,6 +208,8 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
     SELECT
      doi            AS doi,
      coki.oa.coki.open AS oa,
+     openalex.title AS paper_title,
+     openalex.primary_location.source.display_name AS journal_title,
       ARRAY_AGG(STRUCT(
         institutions.identifier AS ror,
         institutions.types AS type,
@@ -226,7 +219,7 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
         )) AS institutions
       FROM ${doi_table}
   LEFT JOIN UNNEST(affiliations.institutions) AS institutions
-  GROUP BY doi, oa
+  GROUP BY doi, oa, paper_title, journal_title
   ),
 
   assignments AS (
@@ -252,8 +245,8 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
     '${field}'                           AS classification,
     alex.id                              AS openalex_id,
     ries.era_id                          AS journal_era_id,
-    alex.journal_title                   AS journal_title,
-    alex.paper_title                     AS paper_title,
+    doi_all.journal_title                   AS journal_title,
+    doi_all.paper_title                     AS paper_title,
     doi_all.oa                           AS oa,
     doi_all.institutions                 AS institutions,
     alex.authors                         AS authors,
