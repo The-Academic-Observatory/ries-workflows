@@ -1,10 +1,3 @@
-/*
-
-1. generate SQL text files, produces .compile_ries_${version}_* files that are then copied into the BQ console and run to generate datasets and tables.
-2. once the datasets are created in BQ, uncomment out export GUI tables to the cloud bucket lines and upload the gui files as csv to GCS, for use in the RIES app (save, run node all.js)
-camel case '*_cc*' csv files are downloaded from GCS to the local data folder in the RIES app and uploaded to cloudflareR2 bucket
-
-*/
 const fs = require("fs");
 const { conf } = require("./code/app.js");
 const tasks = require("./code/tasks.js");
