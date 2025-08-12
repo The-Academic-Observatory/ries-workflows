@@ -69,17 +69,29 @@ CREATE OR REPLACE TABLE \`${project}.${dataset}.heps_outputs${version}\` AS (
     GROUP BY doi, hep_ror, id
   ),
 
-  -- get all authors for a doi
-  authors_all AS (
-      SELECT 
+    -- Get all authors per DOI
+  deduped_authors_all AS ( --Gets a list of all authors for each DOI, ungrouped and deduplicated
+    SELECT DISTINCT
       doi,
+      openalex.id AS id,
+      authorship.author.display_name AS name,
+      authorship.author.orcid AS orcid
+    FROM
+      ${doi_table},
+      UNNEST(openalex.authorships) AS authorship
+    WHERE
+      ARRAY_LENGTH(authorship.institutions) > 0
+  ),
+  authors_all AS ( -- All authors per DOI, with authors in a struct
+    SELECT 
+      doi,
+      id,
       ARRAY_AGG(STRUCT(
-        authors.name AS name,
-        authors.identifier AS orcid
+          name,
+          orcid
       )) AS authors
-      FROM ${doi_table}
-      LEFT JOIN UNNEST(affiliations.authors) as authors
-      GROUP BY doi
+  FROM deduped_authors_all
+  GROUP BY doi, id
   ),
 
   -- extract oa status, institution and country details, title and journal names 
