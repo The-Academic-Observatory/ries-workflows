@@ -28,8 +28,7 @@
 
 # Overview
 
-This project implements a subset of ERA indicators and the methods used to build them. This document describes the sequence of methods required to replicate the project's workflow. Provided that the [required inputs](#required-inputs) are available, then the whole workflow can be (re)run at any time. 
-
+This project implements a subset of ERA indicators and the methods used to build them. This document describes the sequence of methods required to replicate the project's workflow. Provided that the [required inputs](#required-inputs) are available, then the whole workflow can be (re)run at any time.
 
 # ETL / Generated Inputs
 
@@ -52,7 +51,7 @@ A series of ETL scripts (referred to internally as `telescopes`) are used to pre
 ## FoRs
 
 - this method is implemented by `node ./code/telescopes/telescope_fors.js` and may be re-run at any time.
-- authoritative lists of ANZSIC(https://www.abs.gov.au/statistics/classifications/australian-and-new-zealand-standard-research-classification-anzsrc) Field of Research codes are downloaded
+- authoritative lists of ANZSIC(<https://www.abs.gov.au/statistics/classifications/australian-and-new-zealand-standard-research-classification-anzsrc>) Field of Research codes are downloaded
 - ERA18 analysis uses the v2008 codes. ERA23 uses v2020 codes.
 - codes are then transformed and loaded into BigQuery for downstream use.
 
@@ -81,8 +80,8 @@ A series of ETL scripts (referred to internally as `telescopes`) are used to pre
 ## Papers
 
 - this method is implemented by `node ./code/telescopes/telescope_papers.js` and may be re-run at any time.
-- COKI hosts an aggregated dataset of publications (identified by DOI) that draws primarily from [Crossref](https://www.crossref.org/), [OpenAlex](https://openalex.org/), and [unpaywall](https://unpaywall.org/)
-- a subset of papers is extracted from the most recent `observatory.doi` table. 
+- COKI hosts an aggregated dataset of publications (identified by DOI) that draws primarily from [Crossref](https://www.crossref.org/), [OpenAlex](https://openalex.org/)
+- a subset of papers is extracted from the most recent `observatory.doi` table.
 
 [top]
 
@@ -93,7 +92,6 @@ A series of ETL scripts (referred to internally as `telescopes`) are used to pre
 Once the ETL scripts (telescopes) have all been run and the raw data are loaded, the workflow then prepares a set of secondary tables before proceeding to analysis.
 
 The analysis phase builds a subset of ERA indicators (from ERA 2018 and ERA 2023). The ERA process aims to apply a qualitative activity rating to select institutions (HEPs) for each field of research (FoR) in which the institution is active. It additionally reports aggregate statistics for institutions and for fields of research.
-
 
 ## Core outputs
 
@@ -106,42 +104,41 @@ The analysis phase builds a subset of ERA indicators (from ERA 2018 and ERA 2023
 - the final table that the rest of the analyses are built upon is implemented by `core_assignments.js`
 - Fields of education are mapped to fields of research codes by `./code/queries/translate_fors_to_foes.js`
 
-
 ## Research Outputs
 
 - this method is implemented by `./code/queries/benchmark_outputs.js`
 - a tally of research outputs (papers) is computed, by institution, field of research and year (RoR,FoR,year)
 - metrics include:
-  - sum_papers       - total number of publications
-  - sum_citations    - total number of citations (not weighted / adjusted)
-  - sum_portions     - sump of FoR apportionment
-  - avg_citations    - citations per output (using totals)
-  - cent_papers      - total outputs adjusted by FoR apportionment (sum of the fractional assignment to an FoR)
-  - cent_outputs     - percentile based on net outputs
-  - cent_portions    - percentile based on weighted outputs
-  - cent_citations   - percentile based on net citations
-  - cent_cpp         - percentile based on citations per output
-  - rank_papers      - rank based on net outputs
-  - rank_citations   - rank based on net citations
-  - rank_portions    - rank based on weighted outputs
-  - rank_cpp         - rank based on citations per output
+  - sum_papers - total number of publications
+  - sum_citations - total number of citations (not weighted / adjusted)
+  - sum_portions - sump of FoR apportionment
+  - avg_citations - citations per output (using totals)
+  - cent_papers - total outputs adjusted by FoR apportionment (sum of the fractional assignment to an FoR)
+  - cent_outputs - percentile based on net outputs
+  - cent_portions - percentile based on weighted outputs
+  - cent_citations - percentile based on net citations
+  - cent_cpp - percentile based on citations per output
+  - rank_papers - rank based on net outputs
+  - rank_citations - rank based on net citations
+  - rank_portions - rank based on weighted outputs
+  - rank_cpp - rank based on citations per output
 
 - weighted outputs tally the fraction that each paper is assigned to a particular FoR (apportionment)
 - 2-digit FoRs are computed separately to 4-digit FoRs
 - 2-digit analysis aggregates numbers from the 4-digit FoRs based on the first two digits
 - from the primary table (RoR,FoR,year), aggregates are created as SQL views for:
-  - (RoR)      - total outputs for each institution over the ERA period(s)
-  - (FoR)      - total outputs for each field of research over the ERA period(s)
-  - (year)     - total outputs per year over the ERA period(s)
-  - (RoR,FoR)  - total outputs per institution and field of research over the ERA period
+  - (RoR) - total outputs for each institution over the ERA period(s)
+  - (FoR) - total outputs for each field of research over the ERA period(s)
+  - (year) - total outputs per year over the ERA period(s)
+  - (RoR,FoR) - total outputs per institution and field of research over the ERA period
   - (RoR,year) - total outputs per institution per year of the ERA period
   - (FoR,year) - total outputs per discipline per year of the ERA period
 - the entire set is then repeated (again as SQL views), but this time only for Australian HEPs
   - HEP(RoR,FoR,year) - total outputs for each institution over the ERA period(s)
-  - HEP(RoR)      - total outputs for each institution over the ERA period(s)
-  - HEP(FoR)      - total outputs for each field of research over the ERA period(s)
-  - HEP(year)     - total outputs per year over the ERA period(s)
-  - HEP(RoR,FoR)  - total outputs per institution and field of research over the ERA period
+  - HEP(RoR) - total outputs for each institution over the ERA period(s)
+  - HEP(FoR) - total outputs for each field of research over the ERA period(s)
+  - HEP(year) - total outputs per year over the ERA period(s)
+  - HEP(RoR,FoR) - total outputs per institution and field of research over the ERA period
   - HEP(RoR,year) - total outputs per institution per year of the ERA period
   - HEP(FoR,year) - total outputs per discipline per year of the ERA period
 - NOTE: in ERA, outputs are sub-divided by output type (book, book-chapter, journal article, etc). In this analysis, only journal articles are considered.
@@ -154,7 +151,7 @@ The analysis phase builds a subset of ERA indicators (from ERA 2018 and ERA 2023
 
 ## Low Volume Threshold
 
-- this method is implemented by `ind_low_volume.js` 
+- this method is implemented by `ind_low_volume.js`
 - ERA ratings are assigned to an each (RoR,FoR) pair only if the institution meets a minimum activity threshold
 - the threshold is defined as >= 50 weighted outputs per FoR over the ERA period
 - the low-volume flag does not take into account individual years within the ERA period. It is all-or-nothing
@@ -167,21 +164,20 @@ The analysis phase builds a subset of ERA indicators (from ERA 2018 and ERA 2023
 
 ## Interdisciplinary Profiles
 
-- this method is implemented by `ind_interdisc.js` 
+- this method is implemented by `ind_interdisc.js`
 - for each field of research, the analysis shows how often the field is linked to other fields. This is useful for highlighting interdisciplinary activity / crossver. Linkage is identified by two FoR codes being assigned to a given research output (publication / paper)
 - analysis is separated into 2-digit and 4-digit coding
 - the base table is produced for each (insitution,field,year) and provides:
-  - num               - total number of times the two fields are listed together
-  - weight            - total weighted number of times the two fields are listed together
-  - pct_num           - rank (percentile) based on total co-occurrence
-  - pct_weight        - rank (percentile) based on weighted co-occurrence
+  - num - total number of times the two fields are listed together
+  - weight - total weighted number of times the two fields are listed together
+  - pct_num - rank (percentile) based on total co-occurrence
+  - pct_weight - rank (percentile) based on weighted co-occurrence
 - from the primary table, aggregates are created as SQL views for:
   - (insitution,field) - co-occurrence between fields, per insitution, over the whole ERA period
-  - (field)            - co-occurrence between fields over the whole ERA period
-  - (field,year)       - co-occurrence between fields, per year of the ERA period
+  - (field) - co-occurrence between fields over the whole ERA period
+  - (field,year) - co-occurrence between fields, per year of the ERA period
 
 [top]
-
 
 ---
 
@@ -219,25 +215,28 @@ benchmark(FoR,year) = SUM(num_citations(FoR,year)) / SUM(num_articles(FoR,year))
 - a second centile boundary tabulation is based on apportioned output counts
 - articles are grouped by (FoR,year) and sorted by citation count
 - centile boundaries are defined at 1%, 5%, 10%, 25%, 50% (median) and 100% (total) of papers
-- if a centile band lower threshold is 0, then uncited papers will be included in the band 
+- if a centile band lower threshold is 0, then uncited papers will be included in the band
 - Example (not all fields shown):
+
   | `centile` | `papers_net` | `papers_pct` | `local_pct` |
   | --- | --- | --- | --- |
-  | `c1`   | float | float | float |
-  | `c5`   | float | float | float |
-  | `c10`  | float | float | float |
-  | `c25`  | float | float | float |
-  | `c50`  | float | float | float |
-  | `num_outputs`   | float | float | float |
+  | `c1` | float | float | float |
+  | `c5` | float | float | float |
+  | `c10` | float | float | float |
+  | `c25` | float | float | float |
+  | `c50` | float | float | float |
+  | `num_outputs` | float | float | float |
+
 - Where:  
-  | field        | description |
+
+  | field | description |
   | ------------ | ----------- |
-  | `c1`      | first percentile (top 1%), sorted by number of citations descending |
-  | `c5`      | ...top 5% |
-  | `c10`     | ...top 10% |
-  | `c25`     | ...top 25% |
-  | `c50`     | ...median (ie, top 50%) |
-  | `num_outputs`      | ...total number of outputs |
+  | `c1` | first percentile (top 1%), sorted by number of citations descending |
+  | `c5` | ...top 5% |
+  | `c10` | ...top 10% |
+  | `c25` | ...top 25% |
+  | `c50` | ...median (ie, top 50%) |
+  | `num_outputs` | ...total number of outputs |
 
 [top]
 
@@ -338,7 +337,6 @@ HPI_CPP (FoR, year) = sum citations(FoR,year) / num papers(FoR,year)
 
 ---
 
-
 ## ERA 2023 RCI Class (dynamic)
 
 - this method is implemented by `./code/queries/benchmark_rci.js` and is specific to ERA 2023
@@ -349,14 +347,14 @@ HPI_CPP (FoR, year) = sum citations(FoR,year) / num papers(FoR,year)
 - papers are assigned RCI scores (previously) based on the (FoR,year) benchmarks
 - for each (FoR,year) a series of RCI class boundaries are then recursively calculated as:
 
-| class | metric |
-| --- | --- |
-| 0 | uncited papers (RCI 0) |
-| 1 | RCI > 0, <= 1.00 (ie, at or below average RCI) |
-| 2 | RCI(rank 1) to <= mean RCI(rank > 1) |
-| 3 | RCI(rank 2) to <= mean RCI(rank > 2) |
-| 4 | RCI(rank 3) to <= mean RCI(rank > 3) |
-| 5 | RCI(rank 4) to <= mean RCI(rank > 4) |
+| class | metric                                         |
+| ----- | ---------------------------------------------- |
+| 0     | uncited papers (RCI 0)                         |
+| 1     | RCI > 0, <= 1.00 (ie, at or below average RCI) |
+| 2     | RCI(rank 1) to <= mean RCI(rank > 1)           |
+| 3     | RCI(rank 2) to <= mean RCI(rank > 2)           |
+| 4     | RCI(rank 3) to <= mean RCI(rank > 3)           |
+| 5     | RCI(rank 4) to <= mean RCI(rank > 4)           |
 
 - class tallies are then calculated for institutional comparisons
 
@@ -383,13 +381,13 @@ The various ratings scales for ERA 2018 and ERA 2023 are described below
 - this method is implemented in `./code/queries/ind_ratings.js`
 - the `rci band` is our own definition and is not an official ERA method
 
-| rating | assessment | approximate 2023 equivalents | rci band |
-| - | - | - | - |
-| 5 | well above world standard | A:5,4 B:6,5,4 | >= 1.6          |
-| 4 | above world standard      | A:3 B:3       | >= 1.2 .. < 1.6 |
-| 3 | at world standard         | A:2 B:2       | >= 0.8 .. < 1.2 |
-| 2 | below world standard      | A:1 B:1       | >= 0.4 .. < 0.8 |
-| 1 | well below world standard | A:1 B:1       |           < 0.4 |
+| rating | assessment                | approximate 2023 equivalents | rci band        |
+| ------ | ------------------------- | ---------------------------- | --------------- |
+| 5      | well above world standard | A:5,4 B:6,5,4                | >= 1.6          |
+| 4      | above world standard      | A:3 B:3                      | >= 1.2 .. < 1.6 |
+| 3      | at world standard         | A:2 B:2                      | >= 0.8 .. < 1.2 |
+| 2      | below world standard      | A:1 B:1                      | >= 0.4 .. < 0.8 |
+| 1      | well below world standard | A:1 B:1                      | < 0.4           |
 
 - n/a: does not meet the low volume threshold
 - n/r: not rated due to quality control concerns in the data
@@ -405,13 +403,13 @@ The high performer and the world benchmarks are used for the top three ratings g
 - this method is implemented in `./code/queries/ind_ratings.js`
 - the `(rci|hpi) band` is our own definition and is not an official ERA method
 
-| rating | similar to | rci band | hpi band |
-| --- | --- | --- | --- |
-| world leading             | 2018:5   | >= 1.6          | >= 1.2          |
-| well above world standard | 2018:5   | >= 1.6          | >= 0.8 .. < 1.2 |
-| above world standard      | 2018:4   | >= 1.2 .. < 1.6 |           < 0.8 |
-| at world standard            | 2018:3   | >= 0.8 .. < 1.2 |                 |
-| not at world standard     | 2018:2,1 |           < 0.8 |                 |
+| rating                    | similar to | rci band        | hpi band        |
+| ------------------------- | ---------- | --------------- | --------------- |
+| world leading             | 2018:5     | >= 1.6          | >= 1.2          |
+| well above world standard | 2018:5     | >= 1.6          | >= 0.8 .. < 1.2 |
+| above world standard      | 2018:4     | >= 1.2 .. < 1.6 | < 0.8           |
+| at world standard         | 2018:3     | >= 0.8 .. < 1.2 |                 |
+| not at world standard     | 2018:2,1   | < 0.8           |                 |
 
 [top]
 
@@ -424,14 +422,14 @@ Under option B, for assigning ERA 2023 ratings, the HPI is used exclusively for 
 - this method is implemented in `./code/queries/ind_ratings.js`
 - the `(rci|hpi) band` is our own definition and is not an official ERA method
 
-| rating | similar to | rci band | hpi band |
-| --- | --- | --- | --- |
-| AAA | 2018:5   |                 | >= 1.6          |
-| AA  | 2018:5   |                 | >= 1.2 .. < 1.6 |
-| A   | 2018:5   |                 | >= 0.8 .. < 1.2 |
-| B   | 2018:4   | >= 1.2          |                 |
-| C   | 2018:3   | >= 0.8 .. < 1.2 |                 |
-| D   | 2018:2,1 |           < 0.8 |                 |
+| rating | similar to | rci band        | hpi band        |
+| ------ | ---------- | --------------- | --------------- |
+| AAA    | 2018:5     |                 | >= 1.6          |
+| AA     | 2018:5     |                 | >= 1.2 .. < 1.6 |
+| A      | 2018:5     |                 | >= 0.8 .. < 1.2 |
+| B      | 2018:4     | >= 1.2          |                 |
+| C      | 2018:3     | >= 0.8 .. < 1.2 |                 |
+| D      | 2018:2,1   | < 0.8           |                 |
 
 [top]
 
@@ -440,10 +438,9 @@ Under option B, for assigning ERA 2023 ratings, the HPI is used exclusively for 
 # Known Issues
 
 - **Lack of RoR mapping** There is a known lack of RoR (research organisation registry) data associated with publications. For some papers, insufficient author metadata is available to link each author to a RoR-listed institution. This results data loss as papers with no RoR data are dropped from analysis and institutional outputs are under-counted where authors cannot be linked.
-- **Lack of FoR mapping**. Although the pipeline is designed to handle journal-article apportionment between up to three field-of-research (FoR codes), this information is not available in the current input data. Instead, each paper inherits FoR weightings from the encompassing journal. At the journal level, FoR weighting is uniformly apportioned to codes based on the *ERA Journal List*). This results in FoR analysis that is overly generic.
+- **Lack of FoR mapping**. Although the pipeline is designed to handle journal-article apportionment between up to three field-of-research (FoR codes), this information is not available in the current input data. Instead, each paper inherits FoR weightings from the encompassing journal. At the journal level, FoR weighting is uniformly apportioned to codes based on the _ERA Journal List_). This results in FoR analysis that is overly generic.
 - **Ambiguous ISSNs**. Following sanitation of ISSN values (and conversion to linking ISSNs), bad input data may result in some papers linking to more than one journal. These papers are excluded from analysis pending manual correction, resulting in some data loss.
 - **No valid ISSN**. The workflow validates ISSN values (for journals and papers) by mapping against an official ISSN <-> ISSNL dataset from issn.org. Following sanitation, some journals or papers may have no remaining ISSN-L value assigned. These records are excluded from analysis pending manual correction, resulting in some data loss.
 - **Author Weighting**. Like the ERA process, no attempt is made to assign portional weighting based on authorship (and institutional affiliation). For example, if a paper has 9 authors from university A and 1 author from university B, the citation metrics will be assigned equally to A and B. The RoR code for institution A will not be counted 9 times, it will be only counted once.
 
-
-[top]:#methods
+[top]: #methods
