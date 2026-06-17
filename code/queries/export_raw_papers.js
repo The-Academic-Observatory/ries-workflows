@@ -32,8 +32,7 @@ BEGIN
       SELECT
         IFNULL(doi,'') AS doi,
         IFNULL(openalex.publication_year,
-          IFNULL(crossref.published_year
-          )
+          IFNULL(crossref.published_year, -1)
         ) AS year_published,
         
         GREATEST(
